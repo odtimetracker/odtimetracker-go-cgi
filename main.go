@@ -28,7 +28,7 @@ var (
 	appVersion                  = odtimetracker.Version{Major: 0, Minor: 1, Maintenance: 0}
 	appInfo                     = appName + " " + appVersion.String()
 	appDescription              = "Simple tool for time-tracking."
-	templateType                = "bootstrap"       // Used template type ("bootstrap", "dojo", "polymer"):
+	templateType                = "bootstrap"       // Used template type (just "bootstrap" at the moment):
 	dbPath                      = getDatabasePath() // Path to SQLite database
 	ErrTemplateDoesNotExist     = errors.New("The template does not exist.")
 	ErrDatabaseConnectionFailed = errors.New("Unable to connect database.")
@@ -105,20 +105,60 @@ func (h httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 `
 		w.Write([]byte(browserconfig))
 	} else if r.URL.String() == "/ui/bootstrap/script.js" {
-		// TODO This should be definitively rewritten!
 		w.Header().Set("Content-Type", "text/javascript;charset=utf-8")
-		// TODO For now (when we running it from the source folder self)
-		//      this works but we need other solution!
-		js, err := ioutil.ReadFile("ui/bootstrap/script.js")
-		checkError(err)
+		js, _ := ioutil.ReadFile("ui/bootstrap/script.js")
 		w.Write([]byte(js))
 	} else if r.URL.String() == "/ui/bootstrap/style.css" {
-		// TODO This should be definitively rewritten!
 		w.Header().Set("Content-Type", "text/css;charset=utf-8")
-		// TODO For now (when we running it from the source folder self)
-		//      this works but we need other solution!
-		css, err := ioutil.ReadFile("ui/bootstrap/style.css")
-		checkError(err)
+		css, _ := ioutil.ReadFile("ui/bootstrap/style.css")
+		w.Write([]byte(css))
+	} else if r.URL.String() == "/ui/bootstrap/assets/css/bootstrap.min.css" {
+		w.Header().Set("Content-Type", "text/css;charset=utf-8")
+		css, _ := ioutil.ReadFile("ui/bootstrap/assets/css/bootstrap.min.css")
+		w.Write([]byte(css))
+	} else if r.URL.String() == "/ui/bootstrap/assets/css/bootstrap-theme.min.css" {
+		w.Header().Set("Content-Type", "text/css;charset=utf-8")
+		css, _ := ioutil.ReadFile("ui/bootstrap/assets/css/bootstrap-theme.min.css")
+		w.Write([]byte(css))
+	} else if r.URL.String() == "/ui/bootstrap/assets/css/jquery-ui.min.css" {
+		w.Header().Set("Content-Type", "text/css;charset=utf-8")
+		css, _ := ioutil.ReadFile("ui/bootstrap/assets/css/jquery-ui.min.css")
+		w.Write([]byte(css))
+	} else if r.URL.String() == "/ui/bootstrap/assets/css/jquery-ui.structure.min.css" {
+		w.Header().Set("Content-Type", "text/css;charset=utf-8")
+		css, _ := ioutil.ReadFile("ui/bootstrap/assets/css/jquery-ui.structure.min.css")
+		w.Write([]byte(css))
+	} else if r.URL.String() == "/ui/bootstrap/assets/js/bootstrap-3.3.5.min.js" {
+		w.Header().Set("Content-Type", "text/javascript;charset=utf-8")
+		css, _ := ioutil.ReadFile("ui/bootstrap/assets/js/bootstrap-3.3.5.min.js")
+		w.Write([]byte(css))
+	} else if r.URL.String() == "/ui/bootstrap/assets/js/jquery-1.11.3.min.js" {
+		w.Header().Set("Content-Type", "text/javascript;charset=utf-8")
+		css, _ := ioutil.ReadFile("ui/bootstrap/assets/js/jquery-1.11.3.min.js")
+		w.Write([]byte(css))
+	} else if r.URL.String() == "/ui/bootstrap/assets/js/jquery-ui-1.11.4.min.js" {
+		w.Header().Set("Content-Type", "text/javascript;charset=utf-8")
+		css, _ := ioutil.ReadFile("ui/bootstrap/assets/js/jquery-ui-1.11.4.min.js")
+		w.Write([]byte(css))
+	} else if r.URL.String() == "/ui/bootstrap/assets/fonts/glyphicons-halflings-regular.eot" {
+		w.Header().Set("Content-Type", "application/vnd.ms-fontobject")
+		css, _ := ioutil.ReadFile("ui/bootstrap/assets/fonts/glyphicons-halflings-regular.eot")
+		w.Write([]byte(css))
+	} else if r.URL.String() == "/ui/bootstrap/assets/fonts/glyphicons-halflings-regular.svg" {
+		w.Header().Set("Content-Type", "image/svg+xml")
+		css, _ := ioutil.ReadFile("ui/bootstrap/assets/fonts/glyphicons-halflings-regular.svg")
+		w.Write([]byte(css))
+	} else if r.URL.String() == "/ui/bootstrap/assets/fonts/glyphicons-halflings-regular.ttf" {
+		w.Header().Set("Content-Type", "application/x-font-ttf")
+		css, _ := ioutil.ReadFile("ui/bootstrap/assets/fonts/glyphicons-halflings-regular.ttf")
+		w.Write([]byte(css))
+	} else if r.URL.String() == "/ui/bootstrap/assets/fonts/glyphicons-halflings-regular.woff" {
+		w.Header().Set("Content-Type", "application/font-woff")
+		css, _ := ioutil.ReadFile("ui/bootstrap/assets/fonts/glyphicons-halflings-regular.woff")
+		w.Write([]byte(css))
+	} else if r.URL.String() == "/ui/bootstrap/assets/fonts/glyphicons-halflings-regular.woff2" {
+		w.Header().Set("Content-Type", "application/font-woff2")
+		css, _ := ioutil.ReadFile("ui/bootstrap/assets/fonts/glyphicons-halflings-regular.woff2")
 		w.Write([]byte(css))
 	} else if r.URL.String() == "/GetRunningActivity" {
 		getRunningActivity(w, r)
@@ -130,6 +170,10 @@ func (h httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		listActivities(w, r)
 	} else if r.URL.String() == "/ListProjects" {
 		listProjects(w, r)
+	} else if r.URL.String() == "/ProjectNameAutocomplete" {
+		projectsAutocomplete(w, r)
+	} else if r.URL.String() == "/CountOfProjectActivities" {
+		countOfProjectActivities(w, r)
 	} else {
 		mainPage(w, r)
 	}
@@ -142,35 +186,38 @@ func init() {
 }
 
 // Main (entry) function.
-// TODO Using command-line arguments provide several UI types ('bootstrap', 'dojo', 'polymer')
+// TODO Using command-line arguments provide several UI types (just 'bootstrap' at the moment)
 // TODO We need some security on requests/responses...
-// TODO We need track erquests/responses...
+// TODO We need track requests/responses...
 func main() {
 	log.Println("Entering main function...")
 
-	if len(os.Args) > 1 {
-		usage()
-	}
+	log.Println(os.Args);
 
 	var tplType string
-	if os.Args[0] == "--help" {
+	if len(os.Args) > 2 {
 		usage()
-	} else if strings.HasPrefix(os.Args[0], "--type=") == true {
-		tplType = strings.Replace(os.Args[0], "--type=", "", 1)
+	} else if len(os.Args) == 2 {
+		if os.Args[1] == "--help" {
+			usage()
+		} else if strings.HasPrefix(os.Args[1], "--type=") == true {
+			tplType = strings.Replace(os.Args[1], "--type=", "", 1)
+		}
 	}
 
 	// Ensure template type is correct
-	if tplType == "bootstrap" || tplType == "dojo" || tplType == "polymer" {
+	if tplType == "angularjs" || tplType == "bootstrap" || tplType == "polymer" {
 		templateType = tplType
 	}
 
 	// TODO Theme with Polymer used is not implemented yet!
-	if templateType == "polymer" {
+	if templateType == "angularjs" || templateType == "polymer" {
 		log.Println("TODO Theme with Polymer used is not implemented yet!")
 		templateType = "bootstrap"
 	}
 
 	var h httpHandler
+	// TODO User should have possibility of changing this (configuration file)!
 	http.ListenAndServe("localhost:4000", h)
 }
 
@@ -182,6 +229,7 @@ func getDatabasePath() string {
 		return ":memory:"
 	}
 
+	// TODO User should have possibility of changing this (configuration file)!
 	return path.Join(usr.HomeDir, ".odtimetracker.sqlite")
 }
 
@@ -199,7 +247,7 @@ func startActivity(w http.ResponseWriter, r *http.Request) {
 	db, err := database.InitStorage(dbPath)
 	defer db.Close()
 	if err != nil {
-		outputJson(jsonrpc.NewErrorResponse(jsonrpc.InitStorageError, "id"), w)
+		outputJson(jsonrpc.NewErrorResponse(jsonrpc.InitStorageError, "id-XXX"), w)
 		return
 	}
 
@@ -222,7 +270,7 @@ func startActivity(w http.ResponseWriter, r *http.Request) {
 	} else if len(projects) == 0 {
 		p, err := database.InsertProject(db, projectName, "")
 		if err != nil {
-			outputJson(jsonrpc.NewErrorResponse(jsonrpc.NewProjectError, "id"), w)
+			outputJson(jsonrpc.NewErrorResponse(jsonrpc.NewProjectError, "id-XXX"), w)
 			return
 		}
 		project = p
@@ -230,9 +278,9 @@ func startActivity(w http.ResponseWriter, r *http.Request) {
 
 	var a database.Activity
 	a, err = database.InsertActivity(db, project.ProjectId, r.FormValue("name"),
-		r.FormValue("desc"), r.FormValue("tags"))
+		r.FormValue("description"), r.FormValue("tags"))
 	if err != nil {
-		outputJson(jsonrpc.NewErrorResponse(jsonrpc.NewActivityError, "id"), w)
+		outputJson(jsonrpc.NewErrorResponse(jsonrpc.NewActivityError, "id-XXX"), w)
 		return
 	}
 	a.SetProject(project)
@@ -241,7 +289,7 @@ func startActivity(w http.ResponseWriter, r *http.Request) {
 		"Message": "Activity was successfully started.",
 		"Activity": a,
 	}
-	outputJson(jsonrpc.NewResponse(res, "id"), w)
+	outputJson(jsonrpc.NewResponse(res, "id-XXX"), w)
 }
 
 // Stop activity.
@@ -249,26 +297,26 @@ func stopActivity(w http.ResponseWriter, r *http.Request) {
 	db, err := database.InitStorage(dbPath)
 	defer db.Close()
 	if err != nil {
-		outputJson(jsonrpc.NewErrorResponse(jsonrpc.InitStorageError, "id"), w)
+		outputJson(jsonrpc.NewErrorResponse(jsonrpc.InitStorageError, "id-XXX"), w)
 		return
 	}
 
 	ra, err := database.SelectActivityRunning(db)
 	if err != nil {
-		outputJson(jsonrpc.NewErrorResponse(jsonrpc.NoRunningActivityError, "id"), w)
+		outputJson(jsonrpc.NewErrorResponse(jsonrpc.NoRunningActivityError, "id-XXX"), w)
 		return
 	}
 
 	ra.Stopped = time.Now().Format(time.RFC3339)
 	_, err = database.UpdateActivity(db, ra)
 	if err != nil {
-		outputJson(jsonrpc.NewErrorResponse(jsonrpc.UpdateActivityError, "id"), w)
+		outputJson(jsonrpc.NewErrorResponse(jsonrpc.UpdateActivityError, "id-XXX"), w)
 	}
 
 	var msg = map[string]string{
 		"Message": "Activity was successfully stopped.",
 	}
-	outputJson(jsonrpc.NewResponse(msg, "id"), w)
+	outputJson(jsonrpc.NewResponse(msg, "id-XXX"), w)
 }
 
 // Render JSON with details about currently running activity.
@@ -293,7 +341,7 @@ func listActivities(w http.ResponseWriter, r *http.Request) {
 	db, err := database.InitStorage(dbPath)
 	defer db.Close()
 	if err != nil {
-		outputJson(jsonrpc.NewErrorResponse(jsonrpc.InitStorageError, "id"), w)
+		outputJson(jsonrpc.NewErrorResponse(jsonrpc.InitStorageError, "id-XXX"), w)
 		return
 	}
 
@@ -312,14 +360,51 @@ func listProjects(w http.ResponseWriter, r *http.Request) {
 	db, err := database.InitStorage(dbPath)
 	defer db.Close()
 	if err != nil {
-		outputJson(jsonrpc.NewErrorResponse(jsonrpc.InitStorageError, "id"), w)
+		outputJson(jsonrpc.NewErrorResponse(jsonrpc.InitStorageError, "id-XXX"), w)
 		return
 	}
 
 	projects, err := database.SelectProjects(db, -1)
-	checkError(err)
+	if err != nil {
+		outputJson(jsonrpc.NewErrorResponse(jsonrpc.InitStorageError, "id-XXX"), w)
+	}
 
 	json, err := json.Marshal(projects)
+	checkError(err)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(json)
+}
+
+// Provide auto-complete for projects.
+func projectsAutocomplete(w http.ResponseWriter, r *http.Request) {
+	db, err := database.InitStorage(dbPath)
+	defer db.Close()
+	if err != nil {
+		outputJson(jsonrpc.NewErrorResponse(jsonrpc.InitStorageError, "id-XXX"), w)
+		return
+	}
+
+	r.ParseForm()
+	term := r.FormValue("term")
+
+	projects, err := database.SelectProjectWithTerm(db, term)
+	if err != nil {
+		outputJson(jsonrpc.NewErrorResponse(jsonrpc.InitStorageError, "id-XXX"), w)
+	}
+
+	json, err := json.Marshal(projects)
+	checkError(err)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(json)
+}
+
+// Return count of activities of given project.
+func countOfProjectActivities(w http.ResponseWriter, r *http.Request) {
+	// TODO Implement this
+	data := struct { ActivitiesCount int64 }{ 0, }
+	json, err := json.Marshal(data)
 	checkError(err)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -331,7 +416,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 	data := map[string]string{"Name": "odTimeTracker"}
 
 	p := "ui/" + templateType + "/"
-	tpl, err := template.ParseFiles(p+"main.tmpl", p+"header.tmpl", p+"footer.tmpl")
+	tpl, err := template.ParseFiles(p +  "main.tmpl", p + "header.tmpl", p + "footer.tmpl")
 	checkError(err)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -346,7 +431,7 @@ func usage() {
 	fmt.Printf("Usage:\n\n")
 	fmt.Printf("%s --help         Print this help\n", appShortName)
 	fmt.Printf("%s --type=[TYPE]  Use template of given type\n\n", appShortName)
-	fmt.Printf("Available template types are: bootstrap,dojo,polymer\n\n")
+	fmt.Printf("Available template types are: bootstrap\n\n")
 	os.Exit(0)
 }
 
